@@ -1,0 +1,78 @@
+<!doctype html>
+<title>Amazon S3 CORS Upload</title>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/md5.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/S3MultipartUploader.js') }}"></script>
+    <script>
+        $(function () {
+            var fileDOM = $("#uploadFile");
+            var settings = {
+                s3AccessKey: "{{ AWS_ACCESS_KEY_ID }}",
+                s3BucketName: "{{ S3_BUCKET_NAME }}",
+                serverInitMultipartUrl: "{{ url_for('init_multipart') }}",
+
+                onChange: function() {
+                    console.log("onChange");
+                }
+            };
+
+            var uploader = new S3MultipartUploader(fileDOM, settings);
+            $("#uploadButton").click(function() {
+                uploader.startUpload();
+            });
+
+            /*
+            $("#uploadFile").fileupload({
+                dataType: "xml",
+                replaceFileInput: false,
+                add: function (e, data) {
+                    $("#uploadButton").unbind("click").click(function () {
+                            $("#uploadKey").val(params.key);
+                            $("#uploadPolicy").val(params.policy);
+                            $("#uploadSignature").val(params.signature);
+                            data.submit();
+                        });
+                        $("#uploadButton").text("Uploading...").attr("disabled", "disabled");
+                    });
+                },
+                done: function (e, data) {
+                    $("#message").html("Upload done!");
+                },
+                fail: function(e, data) {
+                    console.log(e);
+                    console.log(data);
+                },
+                always: function(e, data) {
+                    $("#uploadButton").text("Upload").removeAttr("disabled");
+                },
+                progress: function (e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    if(progress == 100) {
+                        $("#progress").removeClass("progress-striped active");
+                    }
+                    else {
+                        $("#progress").addClass("progress-striped active");
+                    }
+                    $("#bar").css("width", progress + "%");
+                }
+            });
+            */
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Amazon S3 CORS Resumable Upload</h1>
+    <input type="file" name="file" id="uploadFile">
+    <button type="button" id="uploadButton">Upload</button>
+
+    <div id="progress" class="progress">
+        <div id="bar" class="bar"></div>
+    </div>
+
+    <div id="message"></div>
+</body>
