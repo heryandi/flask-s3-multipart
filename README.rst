@@ -1,5 +1,5 @@
 ==================
-flask-s3-resumable
+flask-s3-multipart
 ==================
 
 This is a sample project to demonstrate how to upload directly to Amazon S3 via CORS using Flask making use of the multipart upload REST API.
@@ -40,4 +40,4 @@ Useful References
 
 `mule-uploader <https://github.com/cinely/mule-uploader>`_
 
-`s3-multipart-upload-browser <https://github.com/ienzam/s3-multipart-upload-browser>`_
+`s3-multipart <https://github.com/maxgillett/s3_multipart>`_
