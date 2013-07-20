@@ -17,40 +17,10 @@
 
                 onChange: function() {
                     console.log("onChange");
-                }
-            };
+                },
 
-            var uploader = new S3MultipartUploader(fileDOM, settings);
-            $("#uploadButton").click(function() {
-                uploader.startUpload();
-            });
-
-            /*
-            $("#uploadFile").fileupload({
-                dataType: "xml",
-                replaceFileInput: false,
-                add: function (e, data) {
-                    $("#uploadButton").unbind("click").click(function () {
-                            $("#uploadKey").val(params.key);
-                            $("#uploadPolicy").val(params.policy);
-                            $("#uploadSignature").val(params.signature);
-                            data.submit();
-                        });
-                        $("#uploadButton").text("Uploading...").attr("disabled", "disabled");
-                    });
-                },
-                done: function (e, data) {
-                    $("#message").html("Upload done!");
-                },
-                fail: function(e, data) {
-                    console.log(e);
-                    console.log(data);
-                },
-                always: function(e, data) {
-                    $("#uploadButton").text("Upload").removeAttr("disabled");
-                },
-                progress: function (e, data) {
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                onProgress: function(e) {
+                    var progress = e.loaded / e.total * 100;
                     if(progress == 100) {
                         $("#progress").removeClass("progress-striped active");
                     }
@@ -58,9 +28,19 @@
                         $("#progress").addClass("progress-striped active");
                     }
                     $("#bar").css("width", progress + "%");
+                },
+
+                onDone: function() {
+                    $("#uploadButton").text("Upload").removeAttr("disabled");
+                    $("#message").html("Upload done!");
                 }
+            };
+
+            var uploader = new S3MultipartUploader(fileDOM, settings);
+            $("#uploadButton").click(function() {
+                uploader.startUpload();
+                $(this).text("Uploading...").attr("disabled", "disabled");
             });
-            */
         });
     </script>
 </head>

@@ -1,7 +1,9 @@
+var S3MultipartUploader = (function() {
+
 function S3MultipartUploader(fileDOM, settings) {
     var me = this;
     me.fileDOM = fileDOM;
-    me.chunkSize = settings.chunkSize || (5 * 1024 * 1024 + 1);
+    me.chunkSize = settings.chunkSize || (5 * 1024 * 1024);
 
     me.s3AccessKey = settings.s3AccessKey;
     me.s3BucketName = settings.s3BucketName;
@@ -16,10 +18,13 @@ function S3MultipartUploader(fileDOM, settings) {
 
     me.onChange = settings.onChange || function() {};
     me.onInitSuccess = settings.onInitSuccess || function() {};
+    me.onProgress = settings.onProgress || function() {};
     me.onDone = settings.onDone || function() {};
 
     me.files = [];
+    me.filesDone = [];
     me.etags = [];
+    me.progress = {};
 
     me.fileDOM.change(me.onChange);
     me.fileDOM.change(function() {
@@ -166,6 +171,16 @@ S3MultipartUploader.prototype.sendChunkS3 = function(fparams, prevParams) {
     var date = fparams.date;
     var authorization = fparams.authorization;
 
+    var progressHandler = function(e) {
+        me.progress[[fileNo, chunkId]] = e.loaded;
+
+        var newE = {
+            "loaded": getLoadedSize.call(me),
+            "total": getTotalSize.call(me)
+        };
+        me.onProgress(newE);
+    };
+
     $.ajax({
         url: url, 
         type: "PUT",
@@ -177,6 +192,13 @@ S3MultipartUploader.prototype.sendChunkS3 = function(fparams, prevParams) {
             "x-amz-date": date,
             "Content-MD5": contentMD5,
             "Authorization": authorization
+        },
+        xhr: function() {
+            var xhr = jQuery.ajaxSettings.xhr();
+            if(xhr instanceof window.XMLHttpRequest) {
+                xhr.upload.addEventListener("progress", progressHandler, false);
+            }
+            return xhr;
         },
         success: function(_, _, jqXHR) {
             console.log("sendChunkS3 success");
@@ -262,79 +284,48 @@ S3MultipartUploader.prototype.completeFileS3 = function(fparams, prevParams) {
             if(completed) {
                 console.log("completeFileS3 success");
                 console.log(result);
+                me.filesDone.push(fileNo);
+                if (me.filesDone.length == me.files.length) {
+                    me.onDone();
+                }
             }
             else {
                 console.log("completeFileS3 error1");
-                //me.completeFileServer(prevParams);
+                me.completeFileServer(prevParams);
             }
         },
         error: function() {
             console.log("completeFileS3 error2");
-            //me.completeFileServer(prevParams);
+            me.completeFileServer(prevParams);
         }
     });
 }
 
-/*
-
-function TxQueue(settings) {
-    var maxQueueSize = settings.maxQueueSize || 4;
-    var queue = [];
-    var completed = [];
-}
-
-TxQueue.prototype.enqueue = function(itemId, subItems) {
-    var me = this;
-    me.queue.push([itemId, subItems]);
-}
-
-TxQueue.prototype.txOne = function(settings) {
-    var retry = settings.retry || false;
-    if(!retry) {
-        if(me.queue.length > 0) {
-            var pair = me.queue[0];
-            var itemId = pair[0];
-            var subItems = pair[1];
-            if(subItems.length > 0) {
-                // send next subitem
-                var currSubItems = subItems.shift();
-            }
-            else {
-                // send complete
-                me.queue.shift()
-            }
-        }
-        else {
-            // totally empty
-            return;
-        }
-    }
-
-    $.ajax({
-        url: url, 
-        type: "PUT",
-        dataType: "xml",
-        headers: {
-        },
-        success: function(result) {
-            settings.retry = false;
-            me.txOne(settings);
-        },
-        error: function() {
-            settings.retry = true;
-            me.txOne(settings, onSuccess);
-        }
-    });
-}
-
-*/
 
 // Utility functions
 
-function clone(obj) {
-    return $.extend({}, obj);
+// Call with .call(this)
+function getLoadedSize() {
+    var total = 0;
+    for(var i in this.progress) {
+        total += this.progress[i];
+    }
+    return total;
+}
+
+// Call with .call(this)
+function getTotalSize() {
+    var total = 0;
+    for(var i in this.files) {
+        total += this.files[i].size;
+    }
+    return total;
 }
 
 function merge(obj1, obj2) {
     return $.extend({}, obj1, obj2);
 }
+
+
+return S3MultipartUploader;
+})();
