@@ -125,7 +125,7 @@ S3MultipartUploader.prototype.sendChunkServer = function(fparams) {
     var fileChunk = me.fileChunk[fileNo];
 
     var start = (chunkId - 1) * me.chunkSize;
-    var end = Math.min(start + me.chunkSize - 1, me.fileSize[fileNo] - 1);
+    var end = Math.min(start + me.chunkSize, me.fileSize[fileNo]);
     console.log(start, end);
 
     var blob = file.slice(start, end);
