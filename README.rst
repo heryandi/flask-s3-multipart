@@ -1,10 +1,10 @@
-========
-flask-s3
-========
+==================
+flask-s3-resumable
+==================
 
-This is a sample project to demonstrate how to upload directly to Amazon S3 via CORS using Flask.
+This is a sample project to demonstrate how to upload directly to Amazon S3 via CORS using Flask making use of the multipart upload REST API.
 
-`jQuery-File-Upload <https://github.com/blueimp/jQuery-File-Upload>`_ is used to help as well.
+The uploaded file will be chunked and sent to S3 concurrently. Every failed Ajax request will be retried until successful.
 
 Using
 =====
@@ -27,8 +27,17 @@ Using
 Useful Docs
 ===========
 
-`Amazon: Browser Uploads to S3 using HTML POST Forms <http://aws.amazon.com/articles/1434>`_
+`Amazon: Multipart Upload Overview <http://docs.aws.amazon.com/AmazonS3/latest/dev/mpuoverview.html>`_
+
+`Amazon: API Support for Multipart Upload <http://docs.aws.amazon.com/AmazonS3/latest/dev/sdksupportformpu.html>`_
+
+`Amazon: Signing and Authenticating REST Requests <http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html>`_
 
 `Amazon: Enabling Cross-Origin Resource Sharing <http://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html>`_
 
-`jQuery-File-Upload: Upload directly to S3 <https://github.com/blueimp/jQuery-File-Upload/wiki/Upload-directly-to-S3>`_
+Useful References
+=================
+
+`mule-uploader <https://github.com/cinely/mule-uploader>`_
+
+`s3-multipart-upload-browser <https://github.com/ienzam/s3-multipart-upload-browser>`_
