@@ -23,7 +23,7 @@ function S3MultipartUploader(fileDOM, settings) {
 
     me.files = [];
     me.filesDone = [];
-    me.etags = [];
+    me.etags = {};
     me.progress = {};
 
     me.fileDOM.change(me.onChange);
@@ -50,7 +50,7 @@ S3MultipartUploader.prototype.startUpload = function() {
         var numChunk = Math.ceil(file.size / me.chunkSize);
         me.numFileChunk[i] = numChunk;
         me.fileChunk[i] = [];
-        me.etags[i] = [];
+        me.etags[i] = {};
 
         // S3 chunk number starts from 1
         for(var n = 1; n <= numChunk; n++) {
@@ -203,8 +203,8 @@ S3MultipartUploader.prototype.sendChunkS3 = function(fparams, prevParams) {
         success: function(_, _, jqXHR) {
             console.log("sendChunkS3 success");
             var etag = jqXHR.getResponseHeader("ETag");
-            me.etags[fileNo].push([chunkId, etag]);
-            if(me.etags[fileNo].length === me.numFileChunk[fileNo]) {
+            me.etags[fileNo][chunkId] = etag;
+            if(Object.keys(me.etags[fileNo]).length === me.numFileChunk[fileNo]) {
                 me.completeFileServer(fparams);
             }
         },
@@ -253,18 +253,17 @@ S3MultipartUploader.prototype.completeFileS3 = function(fparams, prevParams) {
     var date = fparams.date;
     var authorization = fparams.authorization;
 
-    me.etags[fileNo].sort();
     var body = "<CompleteMultipartUpload>";
-    $.each(me.etags[fileNo], function(_, pair) {
+    for(var chunkNo = 1; chunkNo <= me.numFileChunk[fileNo]; chunkNo++) {
         body += "<Part>";
         body +=     "<PartNumber>";
-        body +=         pair[0];
+        body +=         chunkNo
         body +=     "</PartNumber>";
         body +=     "<ETag>";
-        body +=         pair[1];
+        body +=         me.etags[fileNo][chunkNo]
         body +=     "</ETag>";
         body += "</Part>";
-    });
+    }
     body += "</CompleteMultipartUpload>";
 
     $.ajax({
