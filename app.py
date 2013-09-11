@@ -18,7 +18,7 @@ def index():
 
 @app.route("/init_multipart", methods=["GET"])
 def init_multipart():
-    objectName = request.args.get("objectName")
+    objectName = encodeURI(request.args.get("objectName"))
 
     url = "//{bucketName}.s3.amazonaws.com/{objectName}?uploads".format(
         bucketName=S3_BUCKET_NAME,
@@ -42,7 +42,7 @@ def init_multipart():
 
 @app.route("/send_chunk", methods=["GET"])
 def send_chunk():
-    objectName = request.args.get("objectName")
+    objectName = encodeURI(request.args.get("objectName"))
     partNumber = request.args.get("partNumber")
     uploadId = request.args.get("uploadId")
     contentMD5 = request.args.get("contentMD5")
@@ -74,7 +74,7 @@ def send_chunk():
 
 @app.route("/complete_file", methods=["GET"])
 def complete_file():
-    objectName = request.args.get("objectName")
+    objectName = encodeURI(request.args.get("objectName"))
     uploadId = request.args.get("uploadId")
     contentType = request.args.get("contentType")
 
@@ -100,6 +100,14 @@ def complete_file():
         "date": date,
         "authorization": authorization
     })
+
+# Mimic javascript encodeURI() function
+def encodeURI(str):
+    try:
+        from urllib import quote
+    except ImportError:
+        from urllib.parse import quote
+    return quote(str, ";,/?:@&=+$!~*'()")
 
 def curdatetime():
     return time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime()).strip()
