@@ -42,6 +42,7 @@ S3MultipartUploader.prototype.startUpload = function() {
     console.log(me.fileDOM);
     console.log(me.files);
 
+    me.filesDone = [];
     me.numFileChunk = {};
     me.fileChunk = {};
     me.fileSize = {};
@@ -285,7 +286,7 @@ S3MultipartUploader.prototype.completeFileS3 = function(fparams, prevParams) {
                 console.log(result);
                 me.filesDone.push(fileNo);
                 if (me.filesDone.length == me.files.length) {
-                    me.onDone();
+                    me.onDone(result);
                 }
             }
             else {
