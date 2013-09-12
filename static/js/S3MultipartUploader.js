@@ -8,7 +8,10 @@ function S3MultipartUploader(fileDOM, settings) {
     me.s3AccessKey = settings.s3AccessKey;
     me.s3BucketName = settings.s3BucketName;
     me.s3BucketUrl = settings.s3BucketUrl || "//" + me.s3BucketName + ".s3.amazonaws.com";
-    me.s3DestFolderPrefix = settings.s3DestFolderPrefix || "/";
+    me.s3Folder = settings.s3Folder || "";
+    if(me.s3Folder && me.s3Folder.slice(-1) !== "/") {
+        me.s3Folder += "/";
+    }
 
     me.serverBase = settings.serverBase || "/";
     me.serverInitMultipartUrl = settings.serverInitMultipartUrl || (me.serverBase + "init_multipart");
@@ -72,7 +75,7 @@ S3MultipartUploader.prototype.initServer = function(fparams) {
     var fileNo = fparams.fileNo;
     $.get(me.serverInitMultipartUrl, 
         {
-            "objectName": me.files[fileNo].name
+            "objectName": me.s3Folder + me.files[fileNo].name
         }
     ).done(function(params) {
         console.log("initServer success");
@@ -141,7 +144,7 @@ S3MultipartUploader.prototype.sendChunkServer = function(fparams) {
 
         $.get(me.serverSendChunkUrl, 
             {
-                "objectName": file.name,
+                "objectName": me.s3Folder + file.name,
                 "partNumber": chunkId,
                 "uploadId": uploadId,
                 "contentMD5": contentMD5
@@ -229,7 +232,7 @@ S3MultipartUploader.prototype.completeFileServer = function(fparams) {
     var contentType = "application/xml";
     $.get(me.serverCompleteFileUrl, 
         {
-            "objectName": file.name,
+            "objectName": me.s3Folder + file.name,
             "uploadId": uploadId,
             "contentType": contentType
         }
