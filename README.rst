@@ -26,7 +26,7 @@ Using
 Sample CORS Configuration
 =========================
 
-Put this as your CORS configuration::
+Sample CORS configuration to enable CORS API::
 
     <?xml version="1.0" encoding="UTF-8"?>
     <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
@@ -42,10 +42,13 @@ Put this as your CORS configuration::
         </CORSRule>
     </CORSConfiguration>
 
+Note the \* in the AllowedOrigin which means that any domain is allowed to use the CORS API.
+Be sure to change it.
+
 Sample Bucket Policy
 ====================
 
-Sample bucket policy to make enable everyone to download objects from the bucket::
+Sample bucket policy to enable everyone to download objects from the bucket::
 
     {
         "Version": "2008-10-17",
